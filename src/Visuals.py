@@ -2,6 +2,7 @@ from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 import numpy as np
 import wave
 import copy
+import math
 
 class VideoObject:
 	def __init__(self):
@@ -140,10 +141,10 @@ class TimeLine(VideoObject):
 				self.vars["SpecialDates"].remove(self.vars["SpecialDates"][i])
 
 class TuringMaschine(VideoObject):
-	def __init__(self, band="", pos=0, x=0, y=0, font=0, cells=8, linecolor=(255,255,255)):
+	def __init__(self, tape="", pos=0, x=0, y=0, font=0, cells=8, linecolor=(255,255,255)):
 		VideoObject.__init__(self)
-		self.vars["band"] = band
-		self.vars["position"] = pos
+		self.vars["tape"] = dict(enumerate(tape))
+		self.vars["position"] = np.float64(pos)
 
 		if not font:
 			font=fonts[0]
@@ -152,6 +153,7 @@ class TuringMaschine(VideoObject):
 		self.vars["y"] = y
 		self.vars["cells"] = cells
 		self.vars["linecolor"] = linecolor
+		self.vars["marks"] = {}
 
 	def getidentifier():
 		return "TuringMaschine"
@@ -163,7 +165,7 @@ class TuringMaschine(VideoObject):
 		fontsize = 75
 		while True:
 			bbox = d.textbbox((0,0), c, font=font.getfont())[2:]
-			if bbox[1] < goal:
+			if bbox[1] <= goal:
 				fontsize += jumpsize
 			else:
 				jumpsize = jumpsize // 2
@@ -172,6 +174,17 @@ class TuringMaschine(VideoObject):
 			if jumpsize <= 1:
 				break
 		return font
+	def setTape(self, c):
+		pos = int(self.vars['position'])
+		if not len(c):
+			if pos in self.vars["tape"]:
+				del self.vars['tape'][pos]
+		else:
+			self.vars['tape'][pos] = c
+	def addMark(self, p, c):
+		self.vars["marks"][p] = c
+	def rmMark(self, p):
+		del self.vars["marks"][p]
 
 	def Draw(self, frame):
 		d = ImageDraw.Draw(frame.img)
@@ -181,17 +194,26 @@ class TuringMaschine(VideoObject):
 		squareS = frame.img.size[0]/self.vars["cells"]
 		font = self.getFont(d, squareS).getfont()
 
-		center=frame.img.size[0]/2
-		lw = frame.img.size[0]//100
+		start=frame.img.size[0]/2 - squareS*(self.vars['cells']/2+0.5+(self.vars['position'])%1)
+		s = math.floor(self.vars['position']-(self.vars['cells']/2))
 
-		s = self.vars['position']
-		for i in range(self.vars['cells']):
-			d.rectangle((squareS*(s+i), y-squareS/2,squareS*(s+i+1),y+squareS/2), outline=self.vars['linecolor'], width=lw)
+		def DrawCell(i):
+			d.rectangle((squareS*i+start, y-squareS/2,squareS*(i+1)+start,y+squareS/2), outline=self.vars['linecolor'], width=lw)
 			p = s+i
-			txt = self.vars['band']
-			if p>=0 and p<len(txt):
+			txt = self.vars['tape']
+			if p in txt:
 				c = txt[p]
 			else:
 				c = '[]'
 			_,_,w,h = d.textbbox((0,0), c, font)
-			d.text((squareS*(s+i+0.5)-w/2, y-h/2-lw), c, font=font)
+			if p in self.vars["marks"]:
+				color = tuple(int(c) for c in self.vars["marks"][p])
+			else:
+				color = (255,255,255)
+			d.text((start+squareS*(i+0.5)-w/2, y-h*6/10), c, font=font, fill=color)
+
+		lw = frame.img.size[0]//500
+		for i in range(-1, self.vars['cells']+2):
+			DrawCell(i)
+
+		d.rectangle((frame.img.size[0]/2-squareS/2, y-squareS/2, frame.img.size[0]/2+squareS/2,y+squareS/2), outline=self.vars['linecolor'], width=lw*4)

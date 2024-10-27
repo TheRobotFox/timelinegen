@@ -32,8 +32,8 @@ class Video:
 		self.Scriptfile = Scriptfile
 		
 		self.FPS = 30
-		Resolution = [1920, 1080]
-		self.actors = [Actor_bez,Actor_goto,Actor_setVar,AddSpecialDate,RemoveSpecialDate,Wait]
+		Resolution = [1920, 1920//8]
+		self.actors = [Actor_bez,Actor_goto,Actor_setVar,AddSpecialDate,RemoveSpecialDate,Wait, SetTape, addMark, rmMark]
 		self.videoobjects = [TimeLine,Text,Font, TuringMaschine]
 		self.frames=0
 		self.currentTime=0
@@ -179,11 +179,13 @@ class Video:
 
 		mkdir("data/frames")
 		print("Baking",self.frames)
+		audio=False
 		for i in range(int(self.frames+1)):
 			self.Bakeframe(i)
 		for VideoObject in self.objectsList.values():
 			if type(VideoObject)==TimeLine:
 				audio_out.writeframes(bytes(VideoObject.audio_buff))
+				audio = True
 		print("Rendering",self.frames)
 		for frame in self.FrameList:
 			frame.save("data/frames/")
@@ -191,7 +193,7 @@ class Video:
 			mkdir("output")
 		except:
 			pass
-		system("ffmpeg -r "+str(self.FPS)+" -i data/frames/%d.png -i data/audio.wav -vcodec mpeg4 -b 10MB \"output/" + self.out + ".mp4\" -y")
+		system("ffmpeg -r "+str(self.FPS)+" -i data/frames/%d.png " + ("-i data/audio.wav" if audio else "") + "-vcodec mpeg4 -b 10MB \"output/" + self.out + ".mp4\" -y")
 		print("Done!")
 
 	def Bakeframe(self,i):
@@ -221,8 +223,9 @@ class Video:
 					self.RaiseException(res[1])
 
 		for VideoObject in self.objectsList.values():
-			if "SpecialDates" in VideoObject.vars:
-				VideoObject.Draw(self.FrameList[-1])
+			# if "SpecialDates" in VideoObject.vars:
+			# 	VideoObject.Draw(self.FrameList[-1])
+			VideoObject.Draw(self.FrameList[-1])
 		self.FrameList[-1].show()
 
 
@@ -233,4 +236,6 @@ if len(argv) !=2:
 	exit(0)
 Vid = Video(argv[1])
 Vid.interpretScript()
+# Vid.Bakeframe(0)
+# Vid.Renderframe(0)
 Vid.Render()

@@ -169,3 +169,42 @@ class Wait(Actor):
 
 	def getidentifier():
 		return "wait"
+
+class SetTape(Actor):
+	def __init__(self,VideoObject,start,c):
+		Actor.__init__(self,VideoObject,start,0)
+		self.c = c
+
+	def act(self,currenttime):
+		self.VideoObject.setTape(self.c)
+
+	def getidentifier():
+		return "setTape"
+
+class addMark(Actor):
+	def __init__(self,VideoObject,start, p, c=None):
+		Actor.__init__(self,VideoObject,start,0)
+		if c==None:
+			self.c = p
+			self.p = None
+		else:
+			self.p = p
+			self.c = c
+
+	def act(self,currenttime):
+		if self.p==None:
+			self.p = int(self.VideoObject.getVar("position")[1])
+		self.VideoObject.addMark(self.p, self.c)
+
+	def getidentifier():
+		return "addMark"
+class rmMark(Actor):
+	def __init__(self,VideoObject,start, p):
+		Actor.__init__(self,VideoObject,start,0)
+		self.p = p
+
+	def act(self,currenttime):
+		self.VideoObject.rmMark(self.p)
+
+	def getidentifier():
+		return "rmMark"
