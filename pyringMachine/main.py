@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import sys
+import math
+
 class Case:
     def __init__(self, w, m, e):
         self.write=w
@@ -57,25 +59,107 @@ class TM:
             r = "□"
         s = self.states[self.state]
         if not r in s.cases:
-            print("Failed!")
-            exit(0)
+            return None
         else:
             c = s.cases[r]
             self.state = c.state
-            self.tape[self.pos] = c.write
+            if c.write == "□":
+                if self.pos in self.tape:
+                    del self.tape[self.pos]
+            else:
+                self.tape[self.pos] = c.write
             self.pos += -1 if c.move=="L" else 1
             return c
 
+def outputAnim(t: TM, state=False, count =False):
+    print(f"TuringMaschine t(\"{"".join(t.tape.values())}\", {t.pos}, 0, {-0.25 if state or count else 0});")
+    if state:
+        print(f"Text tState(\"z{t.state}\",0,0.72);")
+    print("[1]")
+    while t.running():
+        c = t.step()
+        if not c:
+            print("t.addMark((255,0,0));")
+            print("//Failed!")
+            break
+        # print(t.state, c.write, t.pos)
+        print(f"t.setTape(\"{c.write.replace("□", "")}\");")
+        if state:
+            print(f"tState.setVar(\"text\",\"z{t.state}\");")
+        print(f"t.bez(\"position\", {t.pos}, 1, 10);")
+    else:
+        print("t.addMark((0,255,0));")
+    print("t.wait(1); ")
+
+def outputConfigs(t: TM, latex: bool):
+    def conf(t: TM):
+
+        r = ""
+        if not len(t.tape):
+            start = t.pos
+            end = t.pos
+        else:
+            start = min(*t.tape.keys(),t.pos)
+            end = max(*t.tape.keys(), t.pos)
+        for i in range(start,t.pos):
+            if i in t.tape:
+                c=t.tape[i]
+            else:
+                c="□"
+            r+=c
+        if latex:
+            r+="z_{"+ t.state +"}"
+        else:
+            r+="(z"+ t.state + ")"
+        for i in range(t.pos,end+1):
+            if i in t.tape:
+                c=t.tape[i]
+            else:
+                c="□"
+            r+=c
+        if latex:
+            r=r.replace("□", "\\Box ")
+        return r
+
+    n=0
+    out = f"\\underset{{ {n} }} {{ {conf(t)} }}" if latex else conf(t)
+    while t.running():
+        n+=1
+        c = t.step()
+        if not c:
+            print(out)
+            print("Failed!")
+            return
+        out+= f"\\vdash \\underset{{ {n} }} {{ {conf(t)} }}" if latex else  conf(t) + "\n "
+
+    print(out)
+    print("Done!")
+
+def test(t: TM):
+    while t.running():
+        if not t.step():
+            return False
+    return True
 
 script = open(sys.argv[1]).readlines()
 
-t = TM(script, "aaa")
+t = TM(script, "")
 
-print(f"TuringMaschine t(\"{"".join(t.tape.values())}\");")
-print("[1]")
-while t.running():
-    c = t.step()
-    # print(t.state, c.write, t.pos)
-    print(f"t.setTape(\"{c.write.replace("□", "")}\");")
-    print(f"t.bez(\"position\", {t.pos}, 1, 10);")
-print("t.wait(1); ")
+# Testing
+
+# c = 0
+# tc = 1000
+# for i in range(1, tc):
+#     if math.log2(i)%1>0 and test(TM(script, "a"*i)):
+#         print(i, "Broken")
+#     else:
+#         c+=1
+# print("Successful: ", f"{c}/{tc-1}")
+
+# Configurations
+
+# outputConfigs(t, False)
+outputConfigs(t, True)
+
+# Animation
+# outputAnim(t, state=True)

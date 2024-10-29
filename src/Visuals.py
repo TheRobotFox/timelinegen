@@ -61,7 +61,7 @@ class Text(VideoObject):
 	def Draw(self, frame):
 		d = ImageDraw.Draw(frame.img)
 		textsize=d.textbbox((0,0), self.vars["text"],self.vars["font"].getfont())[2:]
-		pos = (int(frame.img.size[0]/2+self.vars["x"]-textsize[0]/2),int(frame.img.size[1]/2-self.vars["y"]-textsize[1]/2))
+		pos = (int((frame.img.size[0]*(self.vars["x"]+1)-textsize[0])/2),int((frame.img.size[1]*(self.vars["y"]+1)-textsize[1])/2))
 		d.text(pos,str(self.vars["text"]),(int(self.vars["font"].vars["color"][0]),int(self.vars["font"].vars["color"][1]),int(self.vars["font"].vars["color"][2])),self.vars["font"].getfont())
 
 	def getidentifier():
@@ -175,7 +175,7 @@ class TuringMaschine(VideoObject):
 				break
 		return font
 	def setTape(self, c):
-		pos = int(self.vars['position'])
+		pos = round(self.vars['position'])
 		if not len(c):
 			if pos in self.vars["tape"]:
 				del self.vars['tape'][pos]
@@ -207,7 +207,7 @@ class TuringMaschine(VideoObject):
 				c = '[]'
 			_,_,w,h = d.textbbox((0,0), c, font)
 			if p in self.vars["marks"]:
-				color = tuple(int(c) for c in self.vars["marks"][p])
+				color = tuple(math.floor(c) for c in self.vars["marks"][p])
 			else:
 				color = (255,255,255)
 			d.text((start+squareS*(i+0.5)-w/2, y-h*6/10), c, font=font, fill=color)

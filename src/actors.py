@@ -193,7 +193,7 @@ class addMark(Actor):
 
 	def act(self,currenttime):
 		if self.p==None:
-			self.p = int(self.VideoObject.getVar("position")[1])
+			self.p = round(self.VideoObject.getVar("position")[1])
 		self.VideoObject.addMark(self.p, self.c)
 
 	def getidentifier():

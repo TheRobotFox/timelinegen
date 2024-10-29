@@ -11,6 +11,7 @@ audio_out.setnchannels(2)
 audio_out.setsampwidth(2)
 audio_out.setframerate(48000)
 
+# abtract layer for drawing basic shapes
 class Frame:
 	def __init__(self, num, Resolution):
 		self.num = num
@@ -32,7 +33,7 @@ class Video:
 		self.Scriptfile = Scriptfile
 		
 		self.FPS = 30
-		Resolution = [1920, 1920//8]
+		Resolution = [1920, 1920//6]
 		self.actors = [Actor_bez,Actor_goto,Actor_setVar,AddSpecialDate,RemoveSpecialDate,Wait, SetTape, addMark, rmMark]
 		self.videoobjects = [TimeLine,Text,Font, TuringMaschine]
 		self.frames=0
