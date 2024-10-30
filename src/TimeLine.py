@@ -1,5 +1,4 @@
 from os import system,mkdir
-import numpy as np
 from Visuals import *
 from actors import *
 from shutil import rmtree
@@ -19,6 +18,13 @@ class Frame:
 
 	def save(self, path):
 		self.img.save(path+str(self.num)+".png")
+	def setAlpha(self, p):
+		self.img.putalpha(int(p*255))
+	def copy(self):
+		res = self.__class__
+		res.img = self.img.copy()
+		res.num=self.num
+		return res
 
 	def open(self, path):
 		self.img.open(path)
@@ -33,7 +39,7 @@ class Video:
 		self.Scriptfile = Scriptfile
 		
 		self.FPS = 30
-		Resolution = [1920, 1920//6]
+		self.Resolution = [1920, 1080]
 		self.actors = [Actor_bez,Actor_goto,Actor_setVar,AddSpecialDate,RemoveSpecialDate,Wait, SetTape, addMark, rmMark]
 		self.videoobjects = [TimeLine,Text,Font, TuringMaschine]
 		self.frames=0
@@ -194,11 +200,11 @@ class Video:
 			mkdir("output")
 		except:
 			pass
-		system("ffmpeg -r "+str(self.FPS)+" -i data/frames/%d.png " + ("-i data/audio.wav" if audio else "") + "-vcodec mpeg4 -b 10MB \"output/" + self.out + ".mp4\" -y")
+		system("ffmpeg -r "+str(self.FPS)+" -i data/frames/%d.png " + ("-i data/audio.wav" if audio else "") + "-vcodec libx264 -b 10MB \"output/" + self.out + ".mp4\" -y")
 		print("Done!")
 
 	def Bakeframe(self,i):
-		self.FrameList.append(Frame(i,Resolution))
+		self.FrameList.append(Frame(i,self.Resolution))
 		for e,actor in enumerate(self.actorlist):
 			if actor:
 				cactor=self.createActor(actor)
@@ -211,7 +217,19 @@ class Video:
 			if res:
 				self.RaiseException(res[1])
 		for VideoObject in self.objectsList.values():
-			VideoObject.Draw(self.FrameList[-1])
+			if VideoObject.vars["alpha"]==1:
+				VideoObject.Draw(self.FrameList[-1])
+			elif VideoObject.vars["alpha"]==0:
+				pass
+			else:
+				overlay = self.FrameList[-1].copy()
+				# overlay.setAlpha(VideoObject.getVar("alpha")[1])
+				VideoObject.Draw(overlay)
+				now = self.FrameList[-1].img
+				overlay.img.putalpha(int(255*VideoObject.getVar("alpha")[1]))
+				overlay.img
+				self.FrameList[-1].img.paste(overlay.img, (0,0), overlay.img)
+
 
 	def Renderframe(self, time):
 		self.FrameList.append(Frame(0,Resolution))
@@ -237,6 +255,7 @@ if len(argv) !=2:
 	exit(0)
 Vid = Video(argv[1])
 Vid.interpretScript()
+Vid.setResolution([1920,1920//6])
 # Vid.Bakeframe(0)
 # Vid.Renderframe(0)
 Vid.Render()

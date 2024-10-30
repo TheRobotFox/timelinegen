@@ -159,7 +159,7 @@ t = TM(script, "")
 # Configurations
 
 # outputConfigs(t, False)
-outputConfigs(t, True)
+# outputConfigs(t, True)
 
 # Animation
-# outputAnim(t, state=True)
+outputAnim(t, state=True)

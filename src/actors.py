@@ -6,8 +6,8 @@ from numpy.random import randint
 
 samplerate=48000
 
-def beziere(start, end, t, slope):
-	return start+(end-start)*((np.arctan((t-0.5)/slope*360*0.4)/np.arctan(180/slope*0.4))/2+0.5)
+def beziere(start, end, t, slope) -> float:
+	return float(start+(end-start)*((np.arctan((t-0.5)/slope*360*0.4)/np.arctan(180/slope*0.4))/2+0.5))
 
 class Actor:
 	def __init__(self, VideoObject, time_start, duration):

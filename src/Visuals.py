@@ -37,7 +37,7 @@ class Font(VideoObject):
 	def __init__(self, name="twcen.TTF", size=102, color=(255,255,255)):
 		VideoObject.__init__(self)
 		self.vars["name"] = name
-		self.vars["size"] = np.float64(size)
+		self.vars["size"] = float(size)
 		self.vars["color"] = color
 
 	def getfont(self):
@@ -75,9 +75,9 @@ class TimeLine(VideoObject):
 
 	def __init__(self, year, y_offset=.05, font=0, linewidth=25, sections=2, subsections=11, linecolor=(255,255,255), secwidth=22, secheigth=45, subwidth=12, subheigth=30):
 		VideoObject.__init__(self)
-		self.vars["year"] = np.float64(year)
+		self.vars["year"] = float(year)
 		self.vars["linewidth"] = linewidth
-		self.vars["sections"] = np.float64(sections)
+		self.vars["sections"] = float(sections)
 		self.vars["Y"] = y_offset
 		self.vars["subsections"] = int(subsections)
 		self.vars["linecolor"] = linecolor
@@ -144,7 +144,7 @@ class TuringMaschine(VideoObject):
 	def __init__(self, tape="", pos=0, x=0, y=0, font=0, cells=8, linecolor=(255,255,255)):
 		VideoObject.__init__(self)
 		self.vars["tape"] = dict(enumerate(tape))
-		self.vars["position"] = np.float64(pos)
+		self.vars["position"] = float(pos)
 
 		if not font:
 			font=fonts[0]
@@ -170,7 +170,7 @@ class TuringMaschine(VideoObject):
 			else:
 				jumpsize = jumpsize // 2
 				fontsize -= jumpsize
-			font.setVar("size", np.float64(fontsize))
+			font.setVar("size", float(fontsize))
 			if jumpsize <= 1:
 				break
 		return font
