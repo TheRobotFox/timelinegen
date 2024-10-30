@@ -17,7 +17,7 @@ class Frame:
 		self.img = Image.new("RGB", Resolution)
 
 	def save(self, path):
-		self.img.save(path+str(self.num)+".png")
+		self.img.save(path+str(self.num)+".bmp")
 	def setAlpha(self, p):
 		self.img.putalpha(int(p*255))
 	def copy(self):
@@ -200,7 +200,7 @@ class Video:
 			mkdir("output")
 		except:
 			pass
-		system("ffmpeg -r "+str(self.FPS)+" -i data/frames/%d.png " + ("-i data/audio.wav" if audio else "") + "-vcodec libx264 -b 10MB \"output/" + self.out + ".mp4\" -y")
+		system("ffmpeg -r "+str(self.FPS)+" -i data/frames/%d.bmp " + ("-i data/audio.wav" if audio else "") + "-vcodec libx264 -b 10MB \"output/" + self.out + ".mp4\" -y")
 		print("Done!")
 
 	def Bakeframe(self,i):
